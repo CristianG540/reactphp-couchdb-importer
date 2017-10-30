@@ -86,16 +86,31 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
         try {
 
+            /**
+             * Leo el archivo csv que contiene solo los productos por modificar
+             * mediante la libreria csv de phpleague
+             */
             $csv = Reader::createFromPath(__DIR__.'/onlyModifiedProds.csv', 'r');
             $csv->setDelimiter(';');
             $csv->setHeaderOffset(0); //set the CSV header offset
             $records = $csv->getRecords();
 
+            /**
+             * recorro los productos que tenia el archivo
+             */
             foreach ($records as $offset => $record) {
+                /**
+                 * De sap la descripcion trae el nombre la aplicacion la marca
+                 * y la unidad entones aqui extraigo dichos datos
+                 */
                 $tituloApli = explode(".", $record['descripcion']);
                 $aplMarca = explode("/", $tituloApli[1]);
                 $marcaUnd = explode("_", $aplMarca[1]);
 
+                /**
+                 * mapeo los productos con el formato adecuado para la bd en
+                 * couchdb
+                 */
                 $productos[] = [
                     "_id"         => $record['codigo'],
                     "titulo"      => $tituloApli[0],
