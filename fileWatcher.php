@@ -91,7 +91,21 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
             $records = $csv->getRecords();
 
             foreach ($records as $offset => $record) {
-                $productos[] = $record;
+                $tituloApli = explode(".", $record['descripcion']);
+                $aplMarca = explode("/", $tituloApli);
+                $marcaUnd = explode("_", $aplMarca);
+
+                $productos[] = [
+                    "_id"         => $record['codigo'],
+                    "titulo"      => $tituloApli[0],
+                    "aplicacion"  => $aplMarca[0],
+                    "imagen"      => "https://www.igbcolombia.com/sites/default/files/{$record['codigo']}.jpg",
+                    "categoria"   => null,
+                    "marcas"      => $marcaUnd[0],
+                    "unidad"      => $marcaUnd[1],
+                    "existencias" => intval($record['cantInventario']),
+                    "precio"      => intval($record['precio1'])
+                ];
                 //$offset : represents the record offset
                 // array(
                 //  'First Name' => 'jane',
