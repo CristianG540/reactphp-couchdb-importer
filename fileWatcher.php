@@ -90,7 +90,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
             $csv->setHeaderOffset(0); //set the CSV header offset
             $records = $csv->getRecords();
 
-            if($records > 0){
+            if(count($records) > 0){
                 foreach ($records as $offset => $record) {
                     $tituloApli = explode(".", $record['descripcion']);
                     $aplMarca = explode("/", $tituloApli);
