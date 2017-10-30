@@ -9,6 +9,10 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 
+use League\Csv\Exception;
+use League\Csv\Reader;
+use League\Csv\Statement;
+
 /**
  * Esta funcion se encarga de abrirme una conexion nueva cada vez que la cierro
  * con "ORM::set_db(null)"
