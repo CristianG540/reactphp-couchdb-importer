@@ -39,7 +39,7 @@ $dbClient = new \GuzzleHttp\Client([
     ],
     'auth' => ['admin', 'admin']
 ]);
-$productos = [];
+
 /********************* END GUZZLE ******************/
 
 $loop = React\EventLoop\Factory::create();
@@ -48,11 +48,12 @@ $inotify = new MKraemer\ReactInotify\Inotify($loop);
 $inotify->add('observados/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 //$inotify->add('/var/log/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 
-$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, &$productos) {
+$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
     $logger->info('***********************************************************************************');
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
     if($path == "observados/product.txt"){
+        $productos = [];
         echo "se modificaron los productos perro hpta".PHP_EOL;
         /*
         * Con este comando uso git diff para comparar los archivos csv y sacar solo los
@@ -106,16 +107,20 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, &$productos) {
                     "existencias" => intval($record['cantInventario']),
                     "precio"      => intval($record['precio1'])
                 ];
-                //$offset : represents the record offset
-                // array(
-                //  'First Name' => 'jane',
-                //  'Last Name' => 'doe',
-                //  'E-mail' => 'jane.doe@example.com'
-                // );
-                //
             }
 
-            var_dump($productos);
+            /**
+             * Hago una consulta a couchdb que me devuelve todos los prods
+             * que tengo que modificar
+             */
+            $prodsToMod = $dbClient->post('productos/_all_docs', [
+                'query' => ['include_docs' => 'true'],
+                'json' => [
+                    'keys' => array_column($productos, '_id')
+                ]
+            ]);
+
+            var_dump($prodsToMod);
 
 
         } catch (Exception $e) {
