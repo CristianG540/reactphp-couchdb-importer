@@ -115,13 +115,25 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  * que tengo que modificar
                  */
                 $prodsToMod = $dbClient->post('productos/_all_docs', [
-                    'query' => ['include_docs' => 'true'],
+                    //'query' => ['include_docs' => 'true'],
                     'json' => [
                         'keys' => array_column($productos, '_id')
                     ]
                 ]);
+                $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
 
-                var_dump(json_decode( $prodsToMod->getBody()->getContents() ));
+                $productosRev = array_map(function($prod) use ($prodsToMod){
+
+                    $prodRev = array_filter($prodsToMod->rows, function($v) use ($prod){
+                       return $v->id == $prod["_id"];
+                    })[0];
+                    $prod['_rev'] = $prodRev->value->rev;
+                    return $prod;
+
+                }, $productos);
+
+
+                var_dump($productosRev);
             }
 
 
