@@ -48,7 +48,7 @@ $inotify = new MKraemer\ReactInotify\Inotify($loop);
 $inotify->add('observados/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 //$inotify->add('/var/log/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 
-$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
+$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, &$productos) {
     $logger->info('***********************************************************************************');
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
@@ -90,34 +90,33 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
             $csv->setHeaderOffset(0); //set the CSV header offset
             $records = $csv->getRecords();
 
-            if(count($records) > 0){
-                foreach ($records as $offset => $record) {
-                    $tituloApli = explode(".", $record['descripcion']);
-                    $aplMarca = explode("/", $tituloApli);
-                    $marcaUnd = explode("_", $aplMarca);
+            foreach ($records as $offset => $record) {
+                $tituloApli = explode(".", $record['descripcion']);
+                $aplMarca = explode("/", $tituloApli[1]);
+                $marcaUnd = explode("_", $aplMarca[1]);
 
-                    $productos[] = [
-                        "_id"         => $record['codigo'],
-                        "titulo"      => $tituloApli[0],
-                        "aplicacion"  => $aplMarca[0],
-                        "imagen"      => "https://www.igbcolombia.com/sites/default/files/{$record['codigo']}.jpg",
-                        "categoria"   => null,
-                        "marcas"      => $marcaUnd[0],
-                        "unidad"      => $marcaUnd[1],
-                        "existencias" => intval($record['cantInventario']),
-                        "precio"      => intval($record['precio1'])
-                    ];
-                    //$offset : represents the record offset
-                    // array(
-                    //  'First Name' => 'jane',
-                    //  'Last Name' => 'doe',
-                    //  'E-mail' => 'jane.doe@example.com'
-                    // );
-                    //
-                }
-
-                var_dump($productos);
+                $productos[] = [
+                    "_id"         => $record['codigo'],
+                    "titulo"      => $tituloApli[0],
+                    "aplicacion"  => $aplMarca[0],
+                    "imagen"      => "https://www.igbcolombia.com/sites/default/files/{$record['codigo']}.jpg",
+                    "categoria"   => null,
+                    "marcas"      => $marcaUnd[0],
+                    "unidad"      => $marcaUnd[1],
+                    "existencias" => intval($record['cantInventario']),
+                    "precio"      => intval($record['precio1'])
+                ];
+                //$offset : represents the record offset
+                // array(
+                //  'First Name' => 'jane',
+                //  'Last Name' => 'doe',
+                //  'E-mail' => 'jane.doe@example.com'
+                // );
+                //
             }
+
+            var_dump($productos);
+
 
         } catch (Exception $e) {
             $logger->error($e->getMessage());
