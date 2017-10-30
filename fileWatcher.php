@@ -44,7 +44,14 @@ $inotify->add('observados/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 //$inotify->add('/var/log/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 
 $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
+    $logger->info('***********************************************************************************');
     $logger->info('File closed after writing: '.$path.PHP_EOL);
+
+    if($path == "observados/product.txt"){
+        echo "se modificaron los productos perro hpta";
+    }
+
+    $logger->info('***********************************************************************************');
 });
 
 $inotify->on(IN_CREATE, function ($path) use($logger) {
