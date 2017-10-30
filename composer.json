@@ -1,0 +1,19 @@
+{
+    "name": "actualizador/inventario",
+    "description": "Pequeña prueba para insertar un json en couchDB",
+    "authors": [
+        {
+            "name": "Cristian Gonzalez",
+            "email": "cristianneatproy@gmail.com"
+        }
+    ],
+    "require": {
+        "monolog/monolog": "1.*",
+        "react/react": "*",
+        "mkraemer/react-inotify": "*",
+        "react/mysql": "*",
+        "j4mie/paris": "1.*",
+        "guzzlehttp/guzzle": "^6.3",
+        "league/csv": "9.0"
+    }
+}
