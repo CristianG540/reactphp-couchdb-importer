@@ -48,7 +48,36 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
     if($path == "observados/product.txt"){
-        echo "se modificaron los productos perro hpta";
+        echo "se modificaron los productos perro hpta".PHP_EOL;
+        /*
+        * Con este comando uso git diff para comparar los archivos csv y sacar solo los
+        * productos que se modificaron
+        */
+        $command = "git diff --no-index --color=always old-files/oldProds.csv observados/product.txt |perl -wlne 'print $1 if /^\e\[32m\+\e\[m\e\[32m(.*)\e\[m$/' > onlyModifiedProds.csv ";
+        $output = shell_exec($command);
+
+        /*
+        * Como el resultado del comando anterior no me trae el encabezado del csv entonces
+        * lo agrego con las sgtes lineas
+        * mas info aqui * https://stackoverflow.com/questions/1760525/need-to-write-at-beginning-of-file-with-php
+        */
+        $file_data = "codigo;descripcion;precio1;cantInventario" . PHP_EOL;
+        $file_data .= file_get_contents('onlyModifiedProds.csv');
+        file_put_contents('onlyModifiedProds.csv', $file_data);
+
+        /*
+        * Elimino los archivos viejos que hayan en la carpeta de comparacion
+        */
+        $command = "rm -r old-files/*";
+        shell_exec($command);
+
+        /*
+        * Copio el archivo csv con los productos nuevos a la carpeta de comparacion para
+        * compararlos la proxima vez que se ejecute el cron
+        */
+        $command = "cp observados/product.txt old-files/oldProds.csv";
+        $output = shell_exec($command);
+
     }
 
     $logger->info('***********************************************************************************');
