@@ -35,6 +35,7 @@ $dbClient = new \GuzzleHttp\Client([
     ],
     'auth' => ['admin', 'admin']
 ]);
+$productos = [];
 /********************* END GUZZLE ******************/
 
 $loop = React\EventLoop\Factory::create();
@@ -77,6 +78,30 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger) {
         */
         $command = "cp observados/product.txt old-files/oldProds.csv";
         $output = shell_exec($command);
+
+        try {
+
+            $csv = Reader::createFromPath(__DIR__.'/onlyModifiedProds.csv', 'r');
+            $csv->setDelimiter(';');
+            $csv->setHeaderOffset(0); //set the CSV header offset
+            $records = $csv->getRecords();
+
+            foreach ($records as $offset => $record) {
+                $productos[] = $record;
+                //$offset : represents the record offset
+                // array(
+                //  'First Name' => 'jane',
+                //  'Last Name' => 'doe',
+                //  'E-mail' => 'jane.doe@example.com'
+                // );
+                //
+            }
+
+            var_dump($productos);
+
+        } catch (Exception $e) {
+            $logger->error($e->getMessage());
+        }
 
     }
 
