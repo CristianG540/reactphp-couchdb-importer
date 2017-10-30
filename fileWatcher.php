@@ -109,18 +109,20 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                 ];
             }
 
-            /**
-             * Hago una consulta a couchdb que me devuelve todos los prods
-             * que tengo que modificar
-             */
-            $prodsToMod = $dbClient->post('productos/_all_docs', [
-                'query' => ['include_docs' => 'true'],
-                'json' => [
-                    'keys' => array_column($productos, '_id')
-                ]
-            ]);
+            if(count($productos)>0){
+                /**
+                 * Hago una consulta a couchdb que me devuelve todos los prods
+                 * que tengo que modificar
+                 */
+                $prodsToMod = $dbClient->post('productos/_all_docs', [
+                    'query' => ['include_docs' => 'true'],
+                    'json' => [
+                        'keys' => array_column($productos, '_id')
+                    ]
+                ]);
 
-            var_dump($prodsToMod);
+                var_dump(json_decode( $prodsToMod->getBody()->getContents() ));
+            }
 
 
         } catch (Exception $e) {
