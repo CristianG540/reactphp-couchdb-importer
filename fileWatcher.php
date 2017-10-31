@@ -126,8 +126,12 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
             if(count($productos)>0){
                 /**
-                 * Hago una consulta a couchdb que me devuelve todos los prods
-                 * que tengo que modificar
+                 * Para poder modificar los datos en couchdb se debe mandar el
+                 * atributo "_rev" del dato que se quiera modificar, lo que yo hago
+                 * aqui es consultar en couchdb para que me traiga los "_rev" de cada
+                 * producto, suena un poco redundante pero es la forma en couchdb funciona
+                 * hago entonces una consulta a couch usando el api de all_docs, le paso
+                 * los ids de los productos que necesito y el medevuleve el "_rev"
                  */
                 $prodsToMod = $dbClient->post('productos/_all_docs', [
                     //'query' => ['include_docs' => 'true'],
@@ -135,10 +139,24 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                         'keys' => array_column($productos, '_id')
                     ]
                 ]);
+                /**
+                 * saco los productos de la respuesta de guzzle desde la b
+                 */
                 $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
 
+                /**
+                 * una vez tenga los productos desde couchdb con su atributo "_rev"
+                 * respectivo, recorro los productos que tengo en local, con los datos
+                 * correctos a modificar para insertarle el atributo "_rev"
+                 */
                 $productosRev = array_map(function($prod) use ($prodsToMod){
 
+                    /**
+                     * por cada producto local que tengo que modificar hago una
+                     * busqueda en los productos que traje de couch para insertarle
+                     * el atributo "_rev" correspondiente y asi devolver el producto
+                     * con los datos a modificar y al tributo _rev
+                     */
                     $prodRev = array_filter($prodsToMod->rows, function($v) use ($prod){
                        return $v->id == $prod["_id"];
                     })[0];
@@ -147,8 +165,33 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
                 }, $productos);
 
+                /**
+                 * Al final el array con los productos qyedaria en un formato asi como este
+                 *
+                 * [
+                 *   "_id"         => "PE0900",
+                 *   "titulo"      => "EMPAQUE CILINDRO GRAFITADO",
+                 *   "aplicacion"  => "c90,cd 100,eco 100",
+                 *   "imagen"      => "https://www.igbcolombia.com/sites/default/files/PE0900_0.jpg",
+                 *   "categoria"   => null,
+                 *   "marcas"      => "APPLE",
+                 *   "unidad"      => "UND",
+                 *   "existencias" => 129,
+                 *   "precio"      => 82300,
+                 *   "_rev"        => "104-53267aba466835375e021cb82d3a5e98"
+                 *  ]
+                 *
+                 */
 
-                var_dump($productosRev);
+                $resImportCouch = $dbClient->post('productos/_bulk_docs', [
+                    'json' => [
+                        'docs' => $productosRev
+                    ]
+                ]);
+
+                $resImportCouch = json_decode( $resImportCouch->getContents(), true );
+                $logger->warn('Informacion del bolcado de datos: '. json_encode($resImportCouch));
+                var_dump( $resImportCouch );
             }
 
 
@@ -162,9 +205,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 });
 
 $inotify->on(IN_CREATE, function ($path) use($logger) {
-    $logger->info('***********************************************************************************');
     $logger->info('File created: '.$path.PHP_EOL);
-    $logger->info('***********************************************************************************');
 });
 
 $inotify->on(IN_DELETE, function ($path) use($logger) {
