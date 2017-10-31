@@ -189,13 +189,13 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                     ]
                 ]);
 
-                $resImportCouch = json_decode( $resImportCouch->getBody()->getContents(), true );
+                $resImportCouch = json_decode( $resImportCouch->getContents(), true );
                 $logger->warn('Informacion del bolcado de datos: '. json_encode($resImportCouch));
                 var_dump( $resImportCouch );
             }
 
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $logger->error($e->getMessage());
         }
 
