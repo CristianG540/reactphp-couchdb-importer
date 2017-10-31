@@ -167,10 +167,6 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                      */
                     $prodRev = array_values($prodRev);
 
-                    echo "----------";
-                    var_dump($prodRev);
-                    echo "----------";
-
                     $prod['_rev'] = $prodRev[0]->value->rev;
                     return $prod;
 
@@ -194,7 +190,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  *
                  */
 
-                /*$resImportCouch = $dbClient->post('productos/_bulk_docs', [
+                $resImportCouch = $dbClient->post('productos/_bulk_docs', [
                     'json' => [
                         'docs' => $productosRev
                     ]
@@ -202,7 +198,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
                 $resImportCouch = json_decode( $resImportCouch->getBody()->getContents(), true );
                 $logger->warn('Informacion del volcado de datos: '. json_encode($resImportCouch));
-                var_dump( $resImportCouch );*/
+                var_dump( $resImportCouch );
             }
 
 
