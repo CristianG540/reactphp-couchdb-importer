@@ -196,7 +196,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
 
         } catch (Throwable $e) {
-            $logger->error($e->getTraceAsString());
+            $logger->error($e->getMessage()." ".$e->getLine());
         }
 
     }
