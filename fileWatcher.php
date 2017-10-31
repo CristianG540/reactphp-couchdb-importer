@@ -161,6 +161,11 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                     $prodRev = array_filter($prodsToMod->rows, function($v) use ($prod){
                         return $v->id == $prod["_id"];
                     });
+                    /**
+                     * Use array_values to reset keys
+                     * https://stackoverflow.com/questions/10492839/reset-keys-of-array-elements-in-php
+                     */
+                    array_values($prodRev);
 
                     echo "----------";
                     var_dump($prodRev);
