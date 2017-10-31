@@ -66,7 +66,7 @@ $inotify = new MKraemer\ReactInotify\Inotify($loop);
 $inotify->add('observados/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 //$inotify->add('/var/log/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 
-$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient, $utf8ize) {
+$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
     $logger->info('***********************************************************************************');
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
@@ -210,7 +210,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient, $utf8ize) 
 
                 $resImportCouch = $dbClient->post('productos_prod/_bulk_docs', [
                     'json' => [
-                        'docs' => $utf8ize($productosRev)
+                        'docs' => utf8ize($productosRev)
                     ]
                 ]);
 
