@@ -159,13 +159,14 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                      * con los datos a modificar y al tributo _rev
                      */
                     $prodRev = array_filter($prodsToMod->rows, function($v) use ($prod){
-                        echo "----------";
-                        var_dump($v);
-                        var_dump($prod);
-                        echo "----------";
                         return $v->id == $prod["_id"];
-                    })[0];
-                    $prod['_rev'] = $prodRev->value->rev;
+                    });
+
+                    echo "----------";
+                    var_dump($prodRev);
+                    echo "----------";
+
+                    $prod['_rev'] = $prodRev[0]->value->rev;
                     return $prod;
 
                 }, $productos);
