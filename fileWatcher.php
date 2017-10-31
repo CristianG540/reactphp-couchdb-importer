@@ -165,7 +165,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                      * Use array_values to reset keys
                      * https://stackoverflow.com/questions/10492839/reset-keys-of-array-elements-in-php
                      */
-                    array_values($prodRev);
+                    $prodRev = array_values($prodRev);
 
                     echo "----------";
                     var_dump($prodRev);
