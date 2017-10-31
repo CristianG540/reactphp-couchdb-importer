@@ -42,13 +42,31 @@ $dbClient = new \GuzzleHttp\Client([
 
 /********************* END GUZZLE ******************/
 
+/**
+* solve JSON_ERROR_UTF8 error in php json_encode
+* esta funcionsita me corrije un error que habia al tratar de hacerle json encode aun array con tildes
+* en algunos textos
+* @param  array $mixed El erray que se decia corregir
+* @return array        Regresa el mismo array pero corrigiendo errores en la codificacion
+*/
+function utf8ize($mixed) {
+   if (is_array($mixed)) {
+       foreach ($mixed as $key => $value) {
+           $mixed[$key] = utf8ize($value);
+       }
+   } else if (is_string ($mixed)) {
+       return utf8_encode($mixed);
+   }
+   return $mixed;
+}
+
 $loop = React\EventLoop\Factory::create();
 $inotify = new MKraemer\ReactInotify\Inotify($loop);
 
 $inotify->add('observados/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 //$inotify->add('/var/log/', IN_CLOSE_WRITE | IN_CREATE | IN_DELETE);
 
-$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
+$inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient, $utf8ize) {
     $logger->info('***********************************************************************************');
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
@@ -192,7 +210,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
                 $resImportCouch = $dbClient->post('productos_prod/_bulk_docs', [
                     'json' => [
-                        'docs' => $productosRev
+                        'docs' => $utf8ize($productosRev)
                     ]
                 ]);
 
