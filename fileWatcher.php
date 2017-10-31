@@ -145,9 +145,6 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  */
                 $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
 
-                var_dump($productos);
-                var_dump($prodsToMod);
-
                 /**
                  * una vez tenga los productos desde couchdb con su atributo "_rev"
                  * respectivo, recorro los productos que tengo en local, con los datos
@@ -162,7 +159,11 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                      * con los datos a modificar y al tributo _rev
                      */
                     $prodRev = array_filter($prodsToMod->rows, function($v) use ($prod){
-                       return $v->id == $prod["_id"];
+                        echo "----------";
+                        var_dump($v);
+                        var_dump($prod);
+                        echo "----------";
+                        return $v->id == $prod["_id"];
                     })[0];
                     $prod['_rev'] = $prodRev->value->rev;
                     return $prod;
