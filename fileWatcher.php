@@ -134,7 +134,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  * hago entonces una consulta a couch usando el api de all_docs, le paso
                  * los ids de los productos que necesito y el medevuleve el "_rev"
                  */
-                $prodsToMod = $dbClient->post('productos/_all_docs', [
+                $prodsToMod = $dbClient->post('productos_prod/_all_docs', [
                     //'query' => ['include_docs' => 'true'],
                     'json' => [
                         'keys' => array_column($productos, '_id')
@@ -190,7 +190,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  *
                  */
 
-                $resImportCouch = $dbClient->post('productos/_bulk_docs', [
+                $resImportCouch = $dbClient->post('productos_prod/_bulk_docs', [
                     'json' => [
                         'docs' => $productosRev
                     ]
