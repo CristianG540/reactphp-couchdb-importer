@@ -125,6 +125,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
             }
 
             if(count($productos)>0){
+
                 /**
                  * Para poder modificar los datos en couchdb se debe mandar el
                  * atributo "_rev" del dato que se quiera modificar, lo que yo hago
@@ -143,6 +144,9 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  * saco los productos de la respuesta de guzzle desde la b
                  */
                 $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
+
+                var_dump($productos);
+                var_dump($prodsToMod);
 
                 /**
                  * una vez tenga los productos desde couchdb con su atributo "_rev"
@@ -183,15 +187,15 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                  *
                  */
 
-                $resImportCouch = $dbClient->post('productos/_bulk_docs', [
+                /*$resImportCouch = $dbClient->post('productos/_bulk_docs', [
                     'json' => [
                         'docs' => $productosRev
                     ]
                 ]);
 
                 $resImportCouch = json_decode( $resImportCouch->getBody()->getContents(), true );
-                $logger->warn('Informacion del bolcado de datos: '. json_encode($resImportCouch));
-                var_dump( $resImportCouch );
+                $logger->warn('Informacion del volcado de datos: '. json_encode($resImportCouch));
+                var_dump( $resImportCouch );*/
             }
 
 
