@@ -85,7 +85,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
         * lo agrego con las sgtes lineas
         * mas info aqui * https://stackoverflow.com/questions/1760525/need-to-write-at-beginning-of-file-with-php
         */
-        $file_data = "codigo;descripcion;precio1;cantInventario" . PHP_EOL;
+        $file_data = "codigo;descripcion;precio1;cantInventario;_delete" . PHP_EOL;
         $file_data .= file_get_contents('onlyModifiedProds.csv');
         file_put_contents('onlyModifiedProds.csv', $file_data);
 
