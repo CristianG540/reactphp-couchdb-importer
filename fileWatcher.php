@@ -174,19 +174,20 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                      * por cada producto local que tengo que modificar hago una
                      * busqueda en los productos que traje de couch para insertarle
                      * el atributo "_rev" correspondiente y asi devolver el producto
-                     * con los datos a modificar y al tributo _rev
+                     * con los datos a modificar y al tributo _rev.
+                     * si el producto local no esta en couchdb, entonces couchdb
+                     * me devuelve un error, lo capturo y simplemente mando el producto
+                     * sin rev, de esta manera se crea automaticamente
                      */
-                    $prodRev = array_filter($prodsToMod->rows, function($v) use ($prod){
-                        return $v->id == $prod["_id"];
-                    });
-                    /**
-                     * Use array_values to reset keys
-                     * https://stackoverflow.com/questions/10492839/reset-keys-of-array-elements-in-php
-                     */
-                    $prodRev = array_values($prodRev);
-
-                    $prod['_rev'] = $prodRev[0]->value->rev;
-                    return $prod;
+                    foreach ($prodsToMod->rows as $k => $prodCouchdb) {
+                        if($prodCouchdb->key == $prod["_id"]){
+                            if(isset($prodCouchdb->error) && $prodCouchdb->error == "not_found"){
+                                return $prod;
+                            }else{
+                                $prod['_rev'] = $prodCouchdb->value->rev;
+                            }
+                        }
+                    }
 
                 }, $productos);
 
