@@ -184,7 +184,8 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                             if(isset($prodCouchdb->error) && $prodCouchdb->error == "not_found"){
                                 return $prod;
                             }else{
-                                return $prod['_rev'] = $prodCouchdb->value->rev;
+                                $prod['_rev'] = $prodCouchdb->value->rev;
+                                return $prod;
                             }
                         }
                     }
