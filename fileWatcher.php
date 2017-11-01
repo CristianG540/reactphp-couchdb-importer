@@ -138,7 +138,8 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                     "marcas"      => $marcaUnd[0],
                     "unidad"      => $marcaUnd[1],
                     "existencias" => intval($record['cantInventario']),
-                    "precio"      => intval($record['precio1'])
+                    "precio"      => intval($record['precio1']),
+                    "_deleted"    => $record['_delete']
                 ];
             }
 
