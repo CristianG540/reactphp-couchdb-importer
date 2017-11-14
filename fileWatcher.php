@@ -185,6 +185,21 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                             if(isset($prodCouchdb->error) && $prodCouchdb->error == "not_found"){
                                 return $prod;
                             }else{
+
+                                /**
+                                 * Esta revision la hago, por que si el producto/documento fue eliminado
+                                 * anteriormente y entonces se desea volver a crear, cuando yo haga una
+                                 * consulta a couchdb preguntando por el producto asi este eliminado
+                                 * couchdb me lo va a traer con el valor de "deleted" igual a verdero
+                                 * si yo le asigno la revision que ya tenia, digamos la 10, entonces el me
+                                 * va a tirar un error de que updateConflict, lo que hay que hacer es mandar
+                                 * el producto sin la revision
+                                 */
+
+                                if( isset($prodCouchdb->value->deleted) && $prodCouchdb->value->deleted ){
+                                    return $prod;
+                                }
+
                                 $prod['_rev'] = $prodCouchdb->value->rev;
                                 return $prod;
                             }
