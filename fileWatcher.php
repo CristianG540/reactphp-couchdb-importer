@@ -133,7 +133,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
                     "_id"         => $record['codigo'],
                     "titulo"      => $tituloApli[0],
                     "aplicacion"  => $aplMarca[0],
-                    "imagen"      => "https://www.igbcolombia.com/sites/default/files/{$record['codigo']}.jpg",
+                    "imagen"      => "https://www.igbcolombia.com/img_app/{$record['codigo']}.jpg",
                     "categoria"   => null,
                     "marcas"      => $marcaUnd[0],
                     "unidad"      => $marcaUnd[1],
