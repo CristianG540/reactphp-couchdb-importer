@@ -60,7 +60,7 @@ function utf8ize($mixed) {
    return $mixed;
 }
 
-function updateProducts(){
+function updateProducts($dbClient, $logger){
 
     $productos = [];
     echo "se modificaron los productos perro hpta".PHP_EOL;
@@ -235,7 +235,7 @@ function updateProducts(){
 
 }
 
-function updateClients(){
+function updateClients($dbClient, $logger){
     $clientes = [];
     echo "se modificaron los clientes perro hpta".PHP_EOL;
 
@@ -327,11 +327,11 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
     if($path == "observados/product.txt"){
-        updateProducts();
+        updateProducts($dbClient, $logger);
     }
 
     if($path == "observados/client.txt"){
-        updateClients();
+        updateClients($dbClient, $logger);
     }
 
 
