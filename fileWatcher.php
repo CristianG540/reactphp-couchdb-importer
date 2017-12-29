@@ -243,7 +243,7 @@ function updateClients($dbClient, $logger){
     $output = shell_exec($command);
 
 
-    $file_data = "_id;asesor;ciudad;direccion;nombre_cliente;transportadora;asesor_nombre" . PHP_EOL;
+    $file_data = "_id;asesor;ciudad;direccion;nombre_cliente;transportadora;asesor_nombre;telefono" . PHP_EOL;
     $file_data .= file_get_contents('onlyModifiedClients.csv');
     file_put_contents('onlyModifiedClients.csv', $file_data);
 
