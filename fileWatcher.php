@@ -364,8 +364,6 @@ function updateCartera($logger){
 
             $facturasToMod = json_decode( $facturasToMod->getBody()->getContents() );
 
-            var_dump($facturasToMod);
-
             $facturasRev = array_map(function($factura) use ($facturasToMod){
 
                 foreach ($facturasToMod->rows as $k => $facturaCouchdb) {
@@ -386,10 +384,6 @@ function updateCartera($logger){
                 }
 
             }, $facturas);
-
-            var_dump([
-                'docs' => utf8ize($facturasRev)
-            ]);
 
             $resImportCouch = $dbClient->post('cartera/_bulk_docs', [
                 'json' => [
