@@ -369,7 +369,7 @@ function updateCartera($logger){
             $facturasRev = array_map(function($factura) use ($facturasToMod){
 
                 foreach ($facturasToMod->rows as $k => $facturaCouchdb) {
-                    if($facturasToMod->key == $factura["_id"]){
+                    if($facturaCouchdb->key == $factura["_id"]){
 
                         if(isset($facturaCouchdb->error) && $facturaCouchdb->error == "not_found"){
                             return $factura;
