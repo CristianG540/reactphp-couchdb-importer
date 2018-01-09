@@ -13,17 +13,6 @@ use League\Csv\Exception;
 use League\Csv\Reader;
 use League\Csv\Statement;
 
-/**
- * Esta funcion se encarga de abrirme una conexion nueva cada vez que la cierro
- * con "ORM::set_db(null)"
- */
-function getNewConnection() {
-    ORM::configure([
-        'connection_string' => 'mysql:host=localhost;dbname=prueba_mr_1',//'mysql:host=localhost;dbname=i3620810_ps2',
-        'username' => 'webmaster_mr',//'i3620810_ps2',
-        'password' => 'Webmaster2017#@'//'X^XnEwiJq~C8vbi1b*[16^*3'
-    ]);
-}
 
 // create a log channel
 $logger = new Logger('import');
@@ -151,7 +140,7 @@ function updateProducts($dbClient, $logger){
                 ]
             ]);
             /**
-             * saco los productos de la respuesta de guzzle desde la b
+             * saco los productos de la respuesta de guzzle desde la bd
              */
             $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
 
@@ -316,6 +305,105 @@ function updateClients($dbClient, $logger){
     }
 }
 
+function updateCartera($logger){
+    $facturas = [];
+    $dbClient = new \GuzzleHttp\Client([
+        'base_uri' => 'http://3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix.cloudant.com/',
+        'headers' => [
+            'Accept'       => 'application/json',
+            'Content-Type' => 'application/json'
+        ],
+        'auth' => ['3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix', '42d8545f6e5329d97b9c77fbe14f8e6579cefb7d737bdaa0bae8500f5d8d567e']
+    ]);
+
+    echo "se modifico la cartera perro hpta".PHP_EOL;
+
+    $command = "git diff --no-index --color=always old-files/oldCartera.csv observados/invoice.txt |perl -wlne 'print $1 if /^\e\[32m\+\e\[m\e\[32m(.*)\e\[m$/' > onlyModifiedCartera.csv ";
+    $output = shell_exec($command);
+
+
+    $file_data = "factura;valorFac;ValorTotalFac;codCliente;codVendedor;fecha;fechaVencimiento" . PHP_EOL;
+    $file_data .= file_get_contents('onlyModifiedCartera.csv');
+    file_put_contents('onlyModifiedCartera.csv', $file_data);
+
+
+    $command = "rm -r old-files/oldCartera.csv";
+    shell_exec($command);
+
+
+    $command = "cp observados/invoice.txt old-files/oldCartera.csv";
+    $output = shell_exec($command);
+
+    try {
+
+
+        $csv = Reader::createFromPath(__DIR__.'/onlyModifiedCartera.csv', 'r');
+        $csv->setDelimiter(';');
+        $csv->setHeaderOffset(0); //set the CSV header offset
+        $records = $csv->getRecords();
+
+        foreach ($records as $offset => $record) {
+            $facturas[] = [
+                "_id"               => $record['factura'],
+                "valor"             => $record['valorFac'],
+                "valor_total"       => $record['ValorTotalFac'],
+                "cod_cliente"       => $record['codCliente'],
+                "cod_vendedor"      => $record['codVendedor'],
+                "fecha_emision"     => $record['fecha'],
+                "fecha_vencimiento" => $record['fechaVencimiento'],
+            ];
+        }
+
+        if(count($facturas) > 0){
+
+            $facturasToMod = $dbClient->post('cartera/_all_docs', [
+                'json' => [
+                    'keys' => array_column($facturas, '_id')
+                ]
+            ]);
+
+            $facturasToMod = json_decode( $facturasToMod->getBody()->getContents() );
+
+
+            $facturasRev = array_map(function($factura) use ($facturasToMod){
+
+                foreach ($facturasToMod->rows as $k => $facturaCouchdb) {
+                    if($facturasToMod->key == $factura["_id"]){
+
+                        if(isset($facturaCouchdb->error) && $facturaCouchdb->error == "not_found"){
+                            return $factura;
+                        }else{
+
+                            if( isset($facturaCouchdb->value->deleted) && $facturaCouchdb->value->deleted ){
+                                return $factura;
+                            }
+
+                            $factura['_rev'] = $facturaCouchdb->value->rev;
+                            return $factura;
+                        }
+                    }
+                }
+
+            }, $facturas);
+
+            $resImportCouch = $dbClient->post('cartera/_bulk_docs', [
+                'json' => [
+                    'docs' => utf8ize($facturasRev)
+                ]
+            ]);
+
+            $resImportCouch = json_decode( $resImportCouch->getBody()->getContents(), true );
+            $logger->warn('Informacion del volcado de datos: '. json_encode($resImportCouch));
+            var_dump( $resImportCouch );
+        }
+
+
+    } catch (Throwable $e) {
+        $logger->error($e->getMessage()." ".$e->getLine());
+    }
+}
+
+
 $loop = React\EventLoop\Factory::create();
 $inotify = new MKraemer\ReactInotify\Inotify($loop);
 
@@ -332,6 +420,10 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
     if($path == "observados/client.txt"){
         updateClients($dbClient, $logger);
+    }
+
+    if($path == "observados/invoice.txt"){
+        updateCartera($logger);
     }
 
 
