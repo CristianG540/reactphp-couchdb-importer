@@ -364,6 +364,7 @@ function updateCartera($logger){
 
             $facturasToMod = json_decode( $facturasToMod->getBody()->getContents() );
 
+            var_dump($facturasToMod);
 
             $facturasRev = array_map(function($factura) use ($facturasToMod){
 
