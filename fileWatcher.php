@@ -386,6 +386,10 @@ function updateCartera($logger){
 
             }, $facturas);
 
+            var_dump([
+                'docs' => utf8ize($facturasRev)
+            ]);
+
             $resImportCouch = $dbClient->post('cartera/_bulk_docs', [
                 'json' => [
                     'docs' => utf8ize($facturasRev)
