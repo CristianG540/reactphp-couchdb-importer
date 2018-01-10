@@ -49,7 +49,16 @@ function utf8ize($mixed) {
    return $mixed;
 }
 
-function updateProducts($dbClient, $logger){
+function updateProducts($logger){
+
+    $dbClient = new \GuzzleHttp\Client([
+        'base_uri' => 'http://3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix.cloudant.com/',
+        'headers' => [
+            'Accept'       => 'application/json',
+            'Content-Type' => 'application/json'
+        ],
+        'auth' => ['3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix', '42d8545f6e5329d97b9c77fbe14f8e6579cefb7d737bdaa0bae8500f5d8d567e']
+    ]);
 
     $productos = [];
     echo "se modificaron los productos perro hpta".PHP_EOL;
@@ -133,7 +142,7 @@ function updateProducts($dbClient, $logger){
              * hago entonces una consulta a couch usando el api de all_docs, le paso
              * los ids de los productos que necesito y el medevuleve el "_rev"
              */
-            $prodsToMod = $dbClient->post('productos_prod/_all_docs', [
+            $prodsToMod = $dbClient->post('producto/_all_docs', [
                 //'query' => ['include_docs' => 'true'],
                 'json' => [
                     'keys' => array_column($productos, '_id')
@@ -206,7 +215,7 @@ function updateProducts($dbClient, $logger){
              *
              */
 
-            $resImportCouch = $dbClient->post('productos_prod/_bulk_docs', [
+            $resImportCouch = $dbClient->post('producto/_bulk_docs', [
                 'json' => [
                     'docs' => utf8ize($productosRev)
                 ]
@@ -414,7 +423,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
     if($path == "observados/product.txt"){
-        updateProducts($dbClient, $logger);
+        updateProducts($logger);
     }
 
     if($path == "observados/client.txt"){
