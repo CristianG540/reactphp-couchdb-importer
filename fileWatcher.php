@@ -188,7 +188,8 @@ function updateProducts($logger){
                             if( isset($prodCouchdb->value->deleted) && $prodCouchdb->value->deleted ){
                                 return $prod;
                             }
-
+                            $prod['updated_at'] = round(microtime(true) * 1000);
+                            $prod['origen'] = 'sap';
                             $prod['_rev'] = $prodCouchdb->value->rev;
                             return $prod;
                         }
