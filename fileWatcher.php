@@ -52,12 +52,12 @@ function utf8ize($mixed) {
 function updateProducts($logger){
 
     $dbClient = new \GuzzleHttp\Client([
-        'base_uri' => 'http://3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix.cloudant.com/',
+        'base_uri' => 'http://www.gatortyres.com:6984/',
         'headers' => [
             'Accept'       => 'application/json',
             'Content-Type' => 'application/json'
         ],
-        'auth' => ['3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix', '42d8545f6e5329d97b9c77fbe14f8e6579cefb7d737bdaa0bae8500f5d8d567e']
+        'auth' => ['admin', 'admin']
     ]);
 
     $productos = [];
@@ -318,12 +318,12 @@ function updateClients($dbClient, $logger){
 function updateCartera($logger){
     $facturas = [];
     $dbClient = new \GuzzleHttp\Client([
-        'base_uri' => 'http://3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix.cloudant.com/',
+        'base_uri' => 'http://www.gatortyres.com:6984/',
         'headers' => [
             'Accept'       => 'application/json',
             'Content-Type' => 'application/json'
         ],
-        'auth' => ['3ea7c857-8a2d-40a3-bfe6-970ddf53285a-bluemix', '42d8545f6e5329d97b9c77fbe14f8e6579cefb7d737bdaa0bae8500f5d8d567e']
+        'auth' => ['admin', 'admin']
     ]);
 
     echo "se modifico la cartera perro hpta".PHP_EOL;
