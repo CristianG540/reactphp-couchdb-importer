@@ -52,7 +52,7 @@ function utf8ize($mixed) {
 function updateProducts($logger){
 
     $dbClient = new \GuzzleHttp\Client([
-        'base_uri' => 'http://www.gatortyres.com:6984/',
+        'base_uri' => 'https://www.gatortyres.com:6984/',
         'headers' => [
             'Accept'       => 'application/json',
             'Content-Type' => 'application/json'
@@ -318,7 +318,7 @@ function updateClients($dbClient, $logger){
 function updateCartera($logger){
     $facturas = [];
     $dbClient = new \GuzzleHttp\Client([
-        'base_uri' => 'http://www.gatortyres.com:6984/',
+        'base_uri' => 'https://www.gatortyres.com:6984/',
         'headers' => [
             'Accept'       => 'application/json',
             'Content-Type' => 'application/json'
