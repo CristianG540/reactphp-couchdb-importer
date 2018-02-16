@@ -159,7 +159,7 @@ function updateProducts($logger){
              * saco los productos de la respuesta de guzzle desde la bd
              */
             $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
-            $prodsToMod2 = json_decode( $prodsToMod->getBody()->getContents() );
+            $prodsToMod2 = json_decode( $prodsToMod2->getBody()->getContents() );
 
             /**
              * una vez tenga los productos desde couchdb con su atributo "_rev"
@@ -277,7 +277,7 @@ function updateProducts($logger){
             ]);
 
             $resImportCouch = json_decode( $resImportCouch->getBody()->getContents(), true );
-            $resImportCouch2 = json_decode( $resImportCouch->getBody()->getContents(), true );
+            $resImportCouch2 = json_decode( $resImportCouch2->getBody()->getContents(), true );
             $logger->warn('Informacion del volcado de datos: '. json_encode($resImportCouch));
             var_dump( $resImportCouch );
             var_dump( $resImportCouch2 );
