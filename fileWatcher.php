@@ -49,7 +49,7 @@ function utf8ize($mixed) {
    return $mixed;
 }
 
-function updateProducts($logger){
+function updateProducts($logger, $bdName){
 
     $dbClient = new \GuzzleHttp\Client([
         'base_uri' => 'https://www.gatortyres.com:6984/',
@@ -142,7 +142,7 @@ function updateProducts($logger){
              * hago entonces una consulta a couch usando el api de all_docs, le paso
              * los ids de los productos que necesito y el medevuleve el "_rev"
              */
-            $prodsToMod = $dbClient->post('producto/_all_docs', [
+            $prodsToMod = $dbClient->post("{$bdName}/_all_docs", [
                 //'query' => ['include_docs' => 'true'],
                 'json' => [
                     'keys' => array_column($productos, '_id')
@@ -216,7 +216,7 @@ function updateProducts($logger){
              *
              */
 
-            $resImportCouch = $dbClient->post('producto/_bulk_docs', [
+            $resImportCouch = $dbClient->post("{$bdName}/_bulk_docs", [
                 'json' => [
                     'docs' => utf8ize($productosRev)
                 ]
@@ -424,7 +424,8 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
     if($path == "observados/product.txt"){
-        updateProducts($logger);
+        updateProducts($logger, 'producto');
+        updateProducts($logger, 'producto_1');
     }
 
     if($path == "observados/client.txt"){
