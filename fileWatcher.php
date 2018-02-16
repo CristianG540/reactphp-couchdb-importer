@@ -437,7 +437,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
     $logger->info('File closed after writing: '.$path.PHP_EOL);
 
     if($path == "observados/product.txt"){
-        updateProducts($logger, 'producto');
+        updateProducts($logger);
     }
 
     if($path == "observados/client.txt"){
