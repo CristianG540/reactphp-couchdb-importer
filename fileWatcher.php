@@ -49,7 +49,7 @@ function utf8ize($mixed) {
    return $mixed;
 }
 
-function updateProducts($logger, $bdName){
+function updateProducts($logger){
 
     $dbClient = new \GuzzleHttp\Client([
         'base_uri' => 'https://www.gatortyres.com:6984/',
@@ -142,7 +142,14 @@ function updateProducts($logger, $bdName){
              * hago entonces una consulta a couch usando el api de all_docs, le paso
              * los ids de los productos que necesito y el medevuleve el "_rev"
              */
-            $prodsToMod = $dbClient->post("{$bdName}/_all_docs", [
+            $prodsToMod = $dbClient->post("producto/_all_docs", [
+                //'query' => ['include_docs' => 'true'],
+                'json' => [
+                    'keys' => array_column($productos, '_id')
+                ]
+            ]);
+            // para la migracion
+            $prodsToMod = $dbClient->post("producto_1/_all_docs", [
                 //'query' => ['include_docs' => 'true'],
                 'json' => [
                     'keys' => array_column($productos, '_id')
@@ -216,7 +223,13 @@ function updateProducts($logger, $bdName){
              *
              */
 
-            $resImportCouch = $dbClient->post("{$bdName}/_bulk_docs", [
+            $resImportCouch = $dbClient->post("producto/_bulk_docs", [
+                'json' => [
+                    'docs' => utf8ize($productosRev)
+                ]
+            ]);
+            //Migracion
+            $resImportCouch = $dbClient->post("producto_1/_bulk_docs", [
                 'json' => [
                     'docs' => utf8ize($productosRev)
                 ]
@@ -425,8 +438,6 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
     if($path == "observados/product.txt"){
         updateProducts($logger, 'producto');
-        sleep(1);
-        updateProducts($logger, 'producto_1');
     }
 
     if($path == "observados/client.txt"){
