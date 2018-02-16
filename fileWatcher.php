@@ -149,7 +149,7 @@ function updateProducts($logger){
                 ]
             ]);
             // para la migracion
-            $prodsToMod = $dbClient->post("producto_1/_all_docs", [
+            $prodsToMod2 = $dbClient->post("producto_1/_all_docs", [
                 //'query' => ['include_docs' => 'true'],
                 'json' => [
                     'keys' => array_column($productos, '_id')
@@ -159,6 +159,7 @@ function updateProducts($logger){
              * saco los productos de la respuesta de guzzle desde la bd
              */
             $prodsToMod = json_decode( $prodsToMod->getBody()->getContents() );
+            $prodsToMod2 = json_decode( $prodsToMod->getBody()->getContents() );
 
             /**
              * una vez tenga los productos desde couchdb con su atributo "_rev"
@@ -177,6 +178,46 @@ function updateProducts($logger){
                  * sin rev, de esta manera se crea automaticamente
                  */
                 foreach ($prodsToMod->rows as $k => $prodCouchdb) {
+                    if($prodCouchdb->key == $prod["_id"]){
+                        if(isset($prodCouchdb->error) && $prodCouchdb->error == "not_found"){
+                            return $prod;
+                        }else{
+
+                            /**
+                             * Esta revision la hago, por que si el producto/documento fue eliminado
+                             * anteriormente y entonces se desea volver a crear, cuando yo haga una
+                             * consulta a couchdb preguntando por el producto asi este eliminado
+                             * couchdb me lo va a traer con el valor de "deleted" igual a verdero
+                             * si yo le asigno la revision que ya tenia, digamos la 10, entonces el me
+                             * va a tirar un error de que updateConflict, lo que hay que hacer es mandar
+                             * el producto sin la revision
+                             */
+
+                            if( isset($prodCouchdb->value->deleted) && $prodCouchdb->value->deleted ){
+                                return $prod;
+                            }
+                            $prod['updated_at'] = round(microtime(true) * 1000);
+                            $prod['origen'] = 'sap';
+                            $prod['_rev'] = $prodCouchdb->value->rev;
+                            return $prod;
+                        }
+                    }
+                }
+
+            }, $productos);
+
+            $productosRev2 = array_map(function($prod) use ($prodsToMod2){
+
+                /**
+                 * por cada producto local que tengo que modificar hago una
+                 * busqueda en los productos que traje de couch para insertarle
+                 * el atributo "_rev" correspondiente y asi devolver el producto
+                 * con los datos a modificar y al tributo _rev.
+                 * si el producto local no esta en couchdb, entonces couchdb
+                 * me devuelve un error, lo capturo y simplemente mando el producto
+                 * sin rev, de esta manera se crea automaticamente
+                 */
+                foreach ($prodsToMod2->rows as $k => $prodCouchdb) {
                     if($prodCouchdb->key == $prod["_id"]){
                         if(isset($prodCouchdb->error) && $prodCouchdb->error == "not_found"){
                             return $prod;
@@ -229,15 +270,17 @@ function updateProducts($logger){
                 ]
             ]);
             //Migracion
-            $resImportCouch = $dbClient->post("producto_1/_bulk_docs", [
+            $resImportCouch2 = $dbClient->post("producto_1/_bulk_docs", [
                 'json' => [
-                    'docs' => utf8ize($productosRev)
+                    'docs' => utf8ize($productosRev2)
                 ]
             ]);
 
             $resImportCouch = json_decode( $resImportCouch->getBody()->getContents(), true );
+            $resImportCouch2 = json_decode( $resImportCouch->getBody()->getContents(), true );
             $logger->warn('Informacion del volcado de datos: '. json_encode($resImportCouch));
             var_dump( $resImportCouch );
+            var_dump( $resImportCouch2 );
         }
 
 
