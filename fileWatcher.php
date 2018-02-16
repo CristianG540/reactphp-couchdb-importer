@@ -425,6 +425,7 @@ $inotify->on(IN_CLOSE_WRITE, function ($path) use($logger, $dbClient) {
 
     if($path == "observados/product.txt"){
         updateProducts($logger, 'producto');
+        sleep(1);
         updateProducts($logger, 'producto_1');
     }
 
