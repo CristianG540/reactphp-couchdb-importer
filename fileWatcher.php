@@ -142,14 +142,14 @@ function updateProducts($logger){
              * hago entonces una consulta a couch usando el api de all_docs, le paso
              * los ids de los productos que necesito y el medevuleve el "_rev"
              */
-            $prodsToMod = $dbClient->post("producto/_all_docs", [
+            $prodsToMod = $dbClient->post("producto_1/_all_docs", [
                 //'query' => ['include_docs' => 'true'],
                 'json' => [
                     'keys' => array_column($productos, '_id')
                 ]
             ]);
             // para la migracion
-            $prodsToMod2 = $dbClient->post("producto_1/_all_docs", [
+            $prodsToMod2 = $dbClient->post("producto_2/_all_docs", [
                 //'query' => ['include_docs' => 'true'],
                 'json' => [
                     'keys' => array_column($productos, '_id')
@@ -264,13 +264,13 @@ function updateProducts($logger){
              *
              */
 
-            $resImportCouch = $dbClient->post("producto/_bulk_docs", [
+            $resImportCouch = $dbClient->post("producto_1/_bulk_docs", [
                 'json' => [
                     'docs' => utf8ize($productosRev)
                 ]
             ]);
             //Migracion
-            $resImportCouch2 = $dbClient->post("producto_1/_bulk_docs", [
+            $resImportCouch2 = $dbClient->post("producto_2/_bulk_docs", [
                 'json' => [
                     'docs' => utf8ize($productosRev2)
                 ]
